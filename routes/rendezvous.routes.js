@@ -1,16 +1,57 @@
-// routes/rendezvous.routes.js
 import express from 'express';
-import { prendreRendezVous } from '../controllers/rendezvous.controller.js';
-import { annulerRendezVous } from '../controllers/rendezvous.controller.js';
-import { getRendezVousParMedecin } from '../controllers/rendezvous.controller.js';
+import {
+  prendreRendezVous,
+  annulerRendezVous,
+  modifierRendezVous,
+  getRendezVousParMedecin,
+  getRendezVousParPatient,
+  getTousLesRendezVousPourAdmin,
+  getRendezVousParId,
+  getStatistiquesParMedecin
+} from '../controllers/rendezvous.controller.js';
+import RendezVous from '../models/rendezvous.model.js';
+
+
+import { authentifier } from '../middlewares/auth.middleware.js'; // 🔐 Ajout du middleware
+
 const router = express.Router();
-router.post('/prendre', prendreRendezVous);
-router.post('/annuler', annulerRendezVous);
-router.get('/medecin/:medecinId', getRendezVousParMedecin);
+
+// ✔️ Prendre un rendez-vous
+router.post('/', prendreRendezVous);
+
+// ✔️ Annuler un rendez-vous
+router.put('/:id/annuler', async (req, res) => {
+  try {
+    const rdv = await RendezVous.findByIdAndUpdate(req.params.id, { statut: 'annulé' }, { new: true });
+    if (!rdv) return res.status(404).json({ message: "Rendez-vous non trouvé" });
+    res.json(rdv);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+});
+router.patch('/annuler/:id', authentifier, annulerRendezVous);
+
+
+// ✔️ Modifier un rendez-vous
+// router.put('/:id/modifier', modifierRendezVous);
+router.put('/:id/modifier', (req, res) => {
+  console.log('Requête reçue pour modifier RDV', req.params.id, req.body);
+  res.json({ success: true, message: 'Route modifier RDV OK', id: req.params.id, data: req.body });
+});
+
+// ✔️ Liste des RDV d’un médecin
+router.get('/medecin/:medecinId', authentifier, getRendezVousParMedecin);
+router.get('/statistiques/:medecinId', authentifier, getStatistiquesParMedecin);
+
+
+// ✔️ Liste des RDV d’un patient
+router.get('/patient/:patientId', authentifier, getRendezVousParPatient);
+
+// ✔️ Tous les RDV (admin uniquement)
+router.get('/admin/tous', authentifier, getTousLesRendezVousPourAdmin);
+router.get('/:id', authentifier, getRendezVousParId);
+
+
+
 export default router;
-
-
-
-
-
-
