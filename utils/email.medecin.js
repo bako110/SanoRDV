@@ -119,7 +119,7 @@ Mot de passe temporaire : ${password}
 
 ⚠️ Veuillez changer ce mot de passe dès votre première connexion.
 
-URL de connexion : ${process.env.ADMIN_URL || 'http://localhost:3000/api/auth/login'}
+URL de connexion :  'https://sanordv-wu78.onrender.com/auth/login'}
       `,
     };
 
