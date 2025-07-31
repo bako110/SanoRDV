@@ -140,18 +140,36 @@ router.post(
 /* ==========================================================================
     ROUTE POST /verify-reset-code - VÉRIFICATION DU CODE DE RÉINITIALISATION
    ========================================================================== */
-this.http.post('/verify-reset-code', {
-  resetCode: this.code  // ou quel que soit le nom de ta variable
-})
-.subscribe({
-  next: (res) => {
-    console.log('✅ Code vérifié avec succès', res);
+router.post(
+  '/verify-reset-code',
+  [
+    body('resetCode')
+      .notEmpty()
+      .withMessage('Le code de réinitialisation est obligatoire')
+      .isLength({ min: 4, max: 10 })
+      .withMessage('Le code doit contenir entre 4 et 10 caractères')
+      .trim(),
+    
+    body('email')
+      .optional()
+      .isEmail()
+      .withMessage('Format d\'email invalide')
+      .normalizeEmail()
+  ],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      console.log('❌ Erreurs validation verify-reset-code:', errors.array());
+      return res.status(400).json({ 
+        message: 'Code de vérification invalide',
+        erreurs: errors.array(),
+        error: 'VALIDATION_ERROR'
+      });
+    }
+    next();
   },
-  error: (err) => {
-    console.error('❌ Erreur de vérification', err);
-  }
-});
-
+  verifyResetCode
+);
 
 /* ==========================================================================
     ROUTE POST /reset-password - RÉINITIALISATION DU MOT DE PASSE
