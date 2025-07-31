@@ -37,7 +37,7 @@ const createTransporter = () => {
 
 // Template HTML pour l'email (ajout de numeroIdentification)
 const createEmailTemplate = (email, password, username, numeroIdentification) => {
-  const loginUrl = process.env.ADMIN_URL || 'http://localhost:3000/admin';
+  const loginUrl = 'https://sanordv-wu78.onrender.com/auth/login';
 
   return `
 <!DOCTYPE html>
